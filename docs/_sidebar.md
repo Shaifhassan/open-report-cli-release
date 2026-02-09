@@ -9,6 +9,7 @@
   - [Output Directory](dump.md#workspace-path-management)
 
 - **Modules**
+  - [Encryption](encyption.md#encyption-amp-security)
   - [Data Extraction](dump.md#data-extraction-dump)
   - [Session](session.md#session-amp-cache-management)
   - [Data Delivery](deliver.md#data-delivery-deliver)
