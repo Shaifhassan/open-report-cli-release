@@ -28,11 +28,11 @@ Uploads files via SSH File Transfer Protocol for enhanced security.
 
 ### Command Options
 
-| Flag             | Shorthand | Description                                                                                    |
-| ---------------- | --------- | ---------------------------------------------------------------------------------------------- |
-| `--file`         | `-f`      | Manually specify a file to upload (ignoring or adding to cache).                               |
-| `--from-cache`   |           | Boolean (Default: `True`). Set to `false` if you only want to upload manually specified files. |
-| `--add-to-cache` |           | If you specify a manual file via `-f`, this flag adds it to the session record for future use. |
+| Flag             | Shorthand | Description                                                                                                                     |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `--file`         | `-f`      | Manually specify a file to upload (ignoring or adding to cache). support multiple files                                         |
+| `--from-cache`   |           | Include all files from the current session cache, Set to `--no-from-cache` if you only want to upload manually specified files. |
+| `--add-to-cache` |           | If you specify a manual file via `-f`, this flag adds it to the session record for future use.                                  |
 
 ---
 
@@ -54,16 +54,16 @@ _The CLI will automatically find every file you generated in the current session
 If you want to send a specific file that wasn't part of your current session:
 
 ```bash
-open_report deliver ftp MY_SERVER "/manual" --file "./old_report.csv" --from-cache false
+open_report deliver ftp MY_SERVER "/manual" --file "./old_report.csv" --no-from-cache
 
 ```
 
 #### **Scenario C: Hybrid Delivery**
 
-Upload everything from your session **plus** one external log file:
+Upload everything from your session **plus** manually defined files:
 
 ```bash
-open_report deliver ftp MY_SERVER "/daily" --file "./external_log.txt"
+open_report deliver ftp MY_SERVER "/daily" --file "./external_log.txt" --file "./export.csv"
 
 ```
 
