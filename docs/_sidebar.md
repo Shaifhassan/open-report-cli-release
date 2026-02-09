@@ -1,23 +1,23 @@
 - [Introduction](README.md)
-- [Security & Architecture](security.md#security-Architecture)
-- [Installation](installation.md#installation)
-- [Get Started](installation.md#get-started)
+- [Security & Architecture](security.md#security-amp-architecture)
+- [Installation](install.md#installation-amp-deployment)
+- [Get Started](install.md#get-started)
 
 - **Configurations**
-  - [Server Management](servers.md)
-  - [Logger](logging.md)
-  - [Output Directory](dump.md#output-directory)
+  - [Server Management](servers.md#server-management-reference)
+  - [Logger](logging.md#observability-amp-logging)
+  - [Output Directory](dump.md#workspace-path-management)
 
 - **Modules**
-  - [Dumping](dump.md)
-  - [Session](session.md)
-  - [Delivering](deliver.md)
+  - [Data Extraction](dump.md#data-extraction-dump)
+  - [Session](session.md#session-amp-cache-management)
+  - [Data Delivery](deliver.md#data-delivery-deliver)
 
 - **Advanced Usage**
-  - [Automating](automating.md)
+  - [Automating](automating.md#advanced-automation-amp-orchestration)
 
 - **Maintenance**
-  - [Changelog](changes_log.md)
+  - [Changelog](changes_log.md#changelog)
   * [Releases](https://github.com/Shaifhassan/open-report-cli-release/releases)
   <!-- - [Troubleshooting](troubleshooting.md) -->
 
