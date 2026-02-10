@@ -2,7 +2,7 @@
 
 ![logo](_media/icon.svg)
 
-# open_report <small>v1.0.2</small>
+# open_report <small>v1.0.3</small>
 
 > The enterprise-grade heartbeat for your data pipeline.
 
