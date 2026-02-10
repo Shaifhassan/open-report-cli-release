@@ -153,4 +153,4 @@ open_report dump -c DEMO --z-sql-file "archive2.zsql" --z-sql-key "[SECURE_TOKEN
 
 ---
 
-\*Powered by **Xkyeron\***
+\*Powered by **Xkyeron**\*
