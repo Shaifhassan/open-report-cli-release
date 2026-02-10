@@ -4,7 +4,7 @@ Current Stable Version: ![Release](https://img.shields.io/github/v/release/Shaif
 
 ### Distribution Channels
 
-- **Stable:** [Download v1.1.0](https://github.com/Shaifhassan/open-report-cli-release/releases/latest)
+- **Stable:** [Download {{version}}](https://github.com/Shaifhassan/open-report-cli-release/releases/latest)
 - **Beta:** Available via the `develop` branch.
 
 ### Release History

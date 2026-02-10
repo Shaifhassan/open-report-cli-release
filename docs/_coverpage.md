@@ -2,7 +2,9 @@
 
 ![logo](_media/icon.svg)
 
-# open_report <small>v1.0.3</small>
+# open_report
+
+![Release](https://img.shields.io/github/v/release/Shaifhassan/open-report-cli-release?color=green&label=version)
 
 > The enterprise-grade heartbeat for your data pipeline.
 
