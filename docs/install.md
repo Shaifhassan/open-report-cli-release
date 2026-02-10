@@ -100,3 +100,5 @@ Open Report features a deeply nested help system. You can append `--help` to any
 - `open_report servers --help` (Connection management)
 
 ---
+
+\*Powered by **Xkyeron**\*

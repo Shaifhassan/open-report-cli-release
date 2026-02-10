@@ -25,3 +25,5 @@ Open Report leverages native OS-level security features to manage the **Master P
 > **Loss of Master Password:** Because Open Report uses high-entropy encryption, the Master Password cannot be "recovered" if lost. We recommend storing a backup of your Master Password in a corporate-approved Vault.
 
 ---
+
+\*Powered by **Xkyeron\***

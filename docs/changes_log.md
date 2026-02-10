@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.0.3] - 2026-02-10
+
+### Added
+
+- **Encryption Toolkit**: Dedicated `encrypt` command group featuring `password` (for credential obfuscation) and `query` (for creating `.zsql` archives).
+- **Z-SQL Native Support**: The `dump` command now accepts `.zsql` files. It supports both basic encryption and password-protected archives via the new `z_sql_key` logic.
+- **Universal Delivery Servers**: Added server registration support for **API Endpoints** (REST/Webhooks) and **SMTP Email** servers.
+- **Multi-Channel Delivery**: Expanded the `deliver` module with native `api` and `email` subcommands, including support for JSON body parsing and automated attachments.
+
+### Improved
+
+- **Union Query Engine**: Refactored `dump` to support simultaneous multiple file inputs (`-f`), which are now automatically combined into a single `UNION ALL` execution plan.
+- **Cryptography Core**: Upgraded the underlying encryption engine for better performance and cross-platform key handling.
+- **Session Intelligence**: Improved the way the CLI tracks and batches files in the session cache.
+
+### Fixed
+
+- **Double Initialization Warning**: Resolved the issue where `app_context` was being initialized multiple times in certain Oracle/Opera environments.
+- **Broken Links**: Fixed various internal documentation links in the README.
+- **Minor Bug Fixes**: Resolved edge-case failures in path resolution and general stability improvements.
+
+---
+
 ## [1.0.2] - 2026-02-09
 
 ### Added
@@ -54,3 +77,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 * Native Excel (.xlsx) export support using XlsxWriter. -->
 
 ---
+
+\*Powered by **Xkyeron**\*

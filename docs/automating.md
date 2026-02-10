@@ -114,3 +114,5 @@ Open your crontab with `crontab -e` and add the following line to run at midnigh
 - **Session Management:** Always include `open_report session clear` at the start of your script to ensure you don't re-upload yesterday's files.
 
 ---
+
+\*Powered by **Xkyeron**\*

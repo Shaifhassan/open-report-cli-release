@@ -1,213 +1,338 @@
-## Data Extraction (`dump`)
+## Introduction to Dump Command
 
-The `dump` utility is designed for high-performance data retrieval. It supports parameterized queries, multi-file merging, and specialized integration for Oracle Opera PMS environments.
+The `dump` utility is the core engine for high-performance data retrieval within Open Report. It is designed to bridge the gap between complex Oracle environments and modern data formats, supporting everything from simple SQL strings to encrypted batch compositions.
 
-### The Execution Flow
+### The Execution Lifecycle
 
-The `dump` command follows a specific sequence to ensure data integrity and security:
+To ensure maximum security and data integrity, every `dump` command follows a strict internal sequence:
 
-1. **Identity Resolution:** Locates the server alias in your secure config.
-2. **Credential Decryption:** Retrieves the database password from the OS Keychain.
-3. **Query Composition:** Merges SQL strings, files, or folders into a single execution plan.
-4. **Parameter Injection:** Binds dynamic variables to the SQL execution context.
-5. **Output Generation:** Streams data into the requested format (CSV, JSON, etc.).
+1. **Identity Resolution:** The CLI locates your server alias within the secure configuration.
+2. **Credential Decryption:** The database password is securely retrieved from the OS Keychain.
+3. **Query Composition:** SQL strings, local files, or encrypted folders are merged into an execution plan.
+4. **Parameter Injection:** Dynamic variables and "Smart Mappings" are bound to the SQL context.
+5. **Streaming Export:** Data is processed and streamed into your chosen format (CSV, JSON, etc.).
+
+### Global Basic Options
+
+These flags are the foundation of every extraction task.
+
+| Flag            | Shorthand | Description                                                 |
+| --------------- | --------- | ----------------------------------------------------------- |
+| `--conn`        | `-c`      | The server alias (defined in `servers add-oracle`).         |
+| `--query`       | `-q`      | A raw SQL string to execute directly.                       |
+| `--query-file`  | `-f`      | Path to a local `.sql` file containing your query.          |
+| `--param`       | `-p`      | Variables passed in `key=value` format.                     |
+| `--file-name`   |           | Custom path or name for the generated export.               |
+| `--append-file` |           | Appends results to an existing file instead of overwriting. |
+
+> [!TIP]
+> Use the `--help` flag at any level (e.g., `open_report dump delimited --help`) to view advanced tuning options for specific formats.
 
 ---
 
-### Global Extraction Options
+## Output Subcommands
 
-These flags are available to all subcommands under `dump`.
+The `dump` command must be paired with an output subcommand. This determines how the CLI fetches, formats, and presents your data.
 
-| Flag            | Shorthand | Description                                              |
-| --------------- | --------- | -------------------------------------------------------- |
-| `--conn`        | `-c`      | The server alias defined in `servers add-oracle`.        |
-| `--query`       | `-q`      | A raw SQL string to execute.                             |
-| `--query-file`  | `-f`      | Path to a `.sql` file.                                   |
-| `--param`       | `-p`      | Pass variables using `key=value` syntax.                 |
-| `--file-name`   |           | Custom path/name for the export.                         |
-| `--append-file` |           | Appends data to an existing file instead of overwriting. |
+#### **`delimited` (CSV/TSV)**
 
----
-
-### Output Subcommands
-
-#### **1. `delimited` (CSV/TSV)**
-
-The most common export format for data analysts.
+The industry standard for data analysts and spreadsheet integration.
 
 - **Example:** `open_report dump -c PROD -q "SELECT * FROM DUAL" delimited --delimiter ","`
-- **Key Option:** `--no-show-header` to suppress column names (useful for append operations).
+- **Feature:** Use `--no-show-header` to generate "clean" data files, perfect for appending to existing logs.
 
-#### **2. `json`**
+#### **`json`**
 
-Generates a machine-readable JSON array of records.
+Generates structured, machine-readable JSON arrays for web services or modern NoSQL databases.
 
 - **Example:** `open_report dump -c PROD -f ./report.sql json --indentation 2`
 
-#### **3. `fixed-width`**
+#### **`fixed-width`**
 
-Used for legacy system integrations requiring specific character lengths.
+Required for legacy banking or enterprise system integrations that demand specific character alignments.
 
-- **Options:**
-- `--widths`: A comma-separated list of integers (e.g., `10,20,5`).
-- `--right-align-numeric`: Automatically aligns numbers to the right.
+- **Options:** Define column widths with `--widths 10,20,5` and use `--right-align-numeric` for financial formatting.
 
-- **Example:** `open_report dump -c PROD -1 ./report.sql fixed-width --widths 10,20,5`
+#### **`show`**
 
-#### **4. `show`**
+A high-speed "Preview Mode." It renders your query results as a clean, formatted table directly in your terminal without writing a file to disk.
 
-A "Preview Mode" that prints the data to the terminal in a clean tabular format without creating a file.
+- **Example:** `open_report dump -c PROD -q "SELECT * FROM EMPLOYEES" show`
+
+---
+
+## Output Directory (Workspace Management)
+
+Open Report eliminates the need to manage random file paths by maintaining a global **Workspace**. This is the "home base" where all your reports land by default.
+
+### `output-path` | Inspecting the Workspace
+
+Verify where your automated systems are currently writing data.
+
+```bash
+open_report dump output-path
+# Output: ℹ️ Info: Default output directory: C:/Users/Admin/Reports
+
+```
+
+### `set-output-dir` | Updating the Workspace
+
+Relocate your reporting hub to a shared network drive or a dedicated server volume.
+
+```bash
+open_report dump set-output-dir "D:/Enterprise/Data/Reports"
+# Output: ✅ Success: Default output directory updated.
+
+```
+
+---
+
+## Output File Management
+
+Open Report uses a **Hierarchical Path Engine** to determine exactly where a file should be saved. This gives you the flexibility of global defaults with the power of specific overrides.
+
+### The Resolution Hierarchy
+
+1. **Absolute Override:** If you provide a full path (e.g., `C:/Exports/data.csv`), the Workspace is ignored.
+2. **Relative Anchor:** If you provide a partial path (e.g., `daily/report.csv`), it is saved inside your Workspace.
+3. **Automated Naming:** If no file name is provided, the CLI generates a timestamped file inside the Workspace.
+
+### Usage Scenarios
+
+| Scenario          | Command Example                               | Resulting Path (Workspace: `/app/data`) |
+| ----------------- | --------------------------------------------- | --------------------------------------- |
+| **Auto-Generate** | `... delimited`                               | `/app/data/dump_PROD_20260210_0800.csv` |
+| **Simple Name**   | `... --file-name "audit.csv" delimited`       | `/app/data/audit.csv`                   |
+| **Sub-folder**    | `... --file-name "finance/jan.csv" delimited` | `/app/data/finance/jan.csv`             |
+| **Absolute**      | `... --file-name "D:/log.csv" delimited`      | `D:/log.csv`                            |
+
+### Operational Best Practices
+
+> [!IMPORTANT]
+> **Deep-Path Creation:** Open Report is "Path Aware." If you specify a file in a folder that doesn't exist (e.g., `2026/Q1/Sales.csv`), the CLI will recursively create the entire folder structure for you automatically.
+
+- **UNC Paths:** For Windows environments, you can point your workspace directly to a network share: `open_report dump set-output-dir "\\FILE-SERVER\Public\Reports"`.
+- **Automation:** When running in scripts, rely on the **Auto-Generate** feature to prevent file name collisions during high-frequency reporting.
+
+---
+
+Here is the refactored **Section 5: Using Parameters**, designed to match the professional flow of the previous sections.
+
+---
+
+## Using Parameters
+
+Open Report supports **Bind Variables**, allowing you to create reusable SQL templates without hardcoding values. By using parameters, you improve security (preventing SQL injection) and allow the same query file to be used across different contexts or dates.
+
+### Using Placeholders in SQL
+
+In your SQL strings or `.sql` files, define parameters using the colon (`:`) prefix followed by a variable name.
+
+**Example Query (`sales_report.sql`):**
+
+```sql
+SELECT transaction_id, amount, status
+FROM pms_transactions
+WHERE resort = :p_resort and transaction_date = :p_date
+```
+
+### Passing Parameters in the CLI
+
+You can satisfy these placeholders using the `-p` or `--param` flags. Open Report allows you to pass an unlimited number of parameters in a single command.
+
+**Syntax:**
+
+```bash
+open_report dump -c PROD -f sales_report.sql -p p_resort=DEMO -p p_date=2026-01-01 delimited
+
+```
+
+---
+
+### Handling Multiple Parameters
+
+Each parameter requires its own flag. This explicit mapping ensures that complex queries remain readable and easy to debug.
+
+```bash
+open_report dump -c PROD -q "SELECT * FROM users WHERE role = :r AND dept = :d" \
+  -p r=ADMIN \
+  -p d=FINANCE \
+  show
+
+```
+
+### When to Use Quoted Strings
+
+The CLI intelligently parses your input, but there are specific rules for handling spaces and special characters:
+
+- **Simple Values:** If your value has no spaces (e.g., `p_resort=DEMO`), quotes are optional.
+- **Values with Spaces:** If the value contains spaces, you **must** wrap the `key=value` pair or the value itself in quotes.
+- **Complex Strings:** For values containing symbols like `&`, `|`, or `;`, quoting is required to prevent the shell from interpreting them.
+
+**Correct Usage:**
+
+```bash
+# Correct: Multi-word strings
+-p p_name="John Doe"
+
+# Correct: Wrapping the entire pair
+"-p p_status=IN HOUSE"
+
+# Incorrect: This will fail as 'House' will be treated as a new command
+-p p_status=In House
+
+```
+
+### Parameter Best Practices
+
+> [!TIP]
+> **Case Sensitivity:** While SQL keywords are usually case-insensitive, the **values** you pass (like `'DEMO'` vs `'demo'`) often depend on your database settings. Always match the case stored in your tables.
+
+- **Standard Naming:** Use a consistent prefix for your parameters (like `p_`) to distinguish them from standard SQL columns.
+- **Dry Runs:** Use the `show` command to verify your parameters are fetching the correct data before exporting a 100MB CSV file.
+
+---
+
+Here is the refactored documentation for **Sections 6 through 8**. I have optimized the flow to transition logically from setting up the session to automating variable resolution.
 
 ---
 
 ## Database Initialization
 
-Open Report includes native support for **Opera PMS (Oracle Hospitality)** session initialization.
+Open Report includes native, deep integration for **Oracle Hospitality (Opera PMS)** environments. This ensures that any query requiring an active application session (App Context) can be executed without writing custom PL/SQL wrapper scripts.
 
-When using the `--initialize-db` flag, the CLI automatically executes the necessary `app_context` initialization before running your report.
+### The Initialization Workflow
 
-- **Secure Prompting:** If `--username` or `--password` or `--resort` are omitted, the CLI will prompt for them securely.
-- **Command Example:**
+When the `--initialize-db` flag is active, the CLI executes the necessary session handshakes (typically `pms_p.initialize`) before your main query runs.
+
+- **Secure Prompting:** If credentials (`--username`, `--password`, or `--resort`) are omitted, the CLI will pause and prompt for them securely.
+- **Encrypted Input:** Passwords entered during interactive prompts are never masked with asterisks and are never stored in your terminal history.
+
+**Command Example:**
 
 ```bash
-open_report dump -c OPERA_PROD -q "SELECT * FROM v_resv_name" --initialize-db -u MYUSER -r HOTEL01 delimited
+open_report dump -c OPERA_PROD \
+  -q "SELECT * FROM resv_general_view where resort = pms_p.resort" \
+  --initialize-db -u MYUSER -r HOTEL01 \
+  delimited
 
 ```
 
-> [!NOTE]
-> if `--password` is skipped a secure input will be prompted to enter the password.
-> avoid typing clear password
+> [!WARNING]
+> **Avoid Plaintext Passwords:** Whenever possible, avoid typing your password directly in the command. If you skip the `--password` flag, the CLI will provide a secure hidden input prompt.
 
----
+> [!TIP]
+> **Use Key as Passwords** use the `open_report encrypt password` command to get a key read more [here](encyption.md#secure-credential-injection).
 
 ---
 
 ## Smart Parameter Mapping
 
-Open Report features an intelligent mapping system designed to reduce redundancy in your commands. The CLI automatically synchronizes global parameters (`-p`) with specialized flags (like `--resort` or `--username` or `--password`), allowing you to define your context once.
+To reduce command-line clutter, Open Report features an **Intelligent Mapping System**. This allows you to define a value once and have it satisfy both your SQL placeholders and your session initialization requirements.
 
-### How it Works
+### Logic Synchronization
 
-When the `--initialize-db` flag is active, the CLI performs a "pre-flight" check on your parameters. If it detects specific keys in your `-p` list that match required session variables, it maps them automatically.
-
-This means you can avoid passing duplicate flags for the same information.
+When `--initialize-db` is used, the CLI performs a "pre-flight" check on your parameters (`-p`). If it finds keys named `resort`, `username`, or `password`, it automatically satisfies the session requirements using those values.
 
 #### **Redundant (Traditional) Syntax:**
 
-In older versions or standard CLIs, you might have to repeat yourself:
-
 ```bash
-# Don't do this - it's repetitive!
-# here your repeating the same resort in parameter and also for initializing purpose
-open_report dump -c DEMO -q "SELECT..." -p resort="DEMO" -r "DEMO" --initialize-db
+# Don't do this - the 'DEMO' resort is repeated twice!
+open_report dump -c PROD -p resort="DEMO" --resort "DEMO" --initialize-db
 
 ```
 
 #### **Smart Resolved Syntax:**
 
-Open Report simplifies this. If you define it in your parameters, the session initialization "borrows" that value:
-
 ```bash
-# Enterprise Grade - Clean and concise
-# if a parameter is defined with the same name duplicating for initialize purpose
-open_report dump -c DEMO -q "SELECT..." -p resort="DEMO" -p username="SUPERVISOR" --initialize-db show
+# Enterprise Grade - Define it once in the parameters
+open_report dump -c PROD -p resort="DEMO" -p username="SUPERVISOR" --initialize-db show
 
 ```
 
-### Automatic Resolution Priority
+### Resolution Priority
 
-The CLI resolves session variables in the following order of priority:
+The CLI uses a strict hierarchy to resolve session variables:
 
-1. **Explicit Flags:** If you use `-r` or `-u`, these take the highest priority.
-2. **Smart Parameters:** If flags are missing, it looks for `resort`, `username`, or `password` inside your `-p` declarations.
-3. **Interactive Prompt:** If the value is still missing, the CLI will securely prompt you for the input.
-
----
-
-### Benefits for Automation
-
-- **Single Source of Truth:** You only need to manage one list of variables in your calling scripts or batch files.
-- **Cleaner Logs:** Reduces the length of the commands stored in your shell history or log files.
-- **Framework Compatibility:** Makes it easier to integrate with scheduling tools that pass data as generic key-value pairs.
-
-> [!NOTE]
-> **Security Reminder:** While `password` can be resolved via Smart Mapping, we recommend using the **Master Password Vault** or **Encrypted String** methods for production passwords to ensure they are never visible in plaintext in your command history.
-
----
-
----
+1. **Explicit Flags:** Direct flags like `-r` or `-u` always take the highest priority.
+2. **Smart Parameters:** If flags are missing, the CLI scans the `-p` list for matching keys.
+3. **Secure Prompt:** If the value is still missing, the CLI triggers an interactive prompt.
 
 ---
 
 ## Dynamic Parameter Resolution
 
-Open Report allows for advanced parameter parsing where values can be resolved dynamically via database function calls before the main query executes. This is particularly useful for workflows that depend on system variables like the **Business Date**.
+Open Report supports **Dynamic Expression Parsing**. This allows parameter values to be resolved via database function calls _before_ the main query executes, enabling truly "set-and-forget" automation.
 
-### Usage with Database Functions
+### The `@[]` Expression Syntax
 
-You can pass a database expression as a parameter value by using the `@[]` syntax. The CLI will resolve the expression within the `@[]` brackets against the database first, then inject the result into your main query.
+By wrapping a value in `@[...]`, you instruct the CLI to execute that expression against the database first. The resulting value is then captured and injected into your main SQL statement.
 
-#### **Enterprise Example: Opera Business Date**
+#### **Example: Dynamic Business Date**
 
-Instead of manually typing today's date, you can instruct Open Report to fetch it from the PMS system automatically:
+In PMS environments, reporting usually depends on the current "Business Date" rather than the calendar date. You can fetch this dynamically:
 
 ```bash
-open_report dump \
-  -c DEMO \
-  -q "SELECT RESV_NAME_ID FROM RESERVATION_GENERAL_VIEW WHERE resort = :resort AND arrival = TO_DATE(:p_date, 'YYYY-MM-DD')" \
+open_report dump -c PROD \
+  -q "SELECT * FROM RESV_HISTORY WHERE resort = :resort AND arrival = :p_date" \
   -p resort="DEMO" \
   -p p_date="@[to_char(pms_p.business_date, 'YYYY-MM-DD')]" \
-  --initialize-db -u SUPERVISOR \
-  show
+  --initialize-db show
 
 ```
 
-```bash
-# add calculations to resolve the date dynamically
--p p_date="@[to_char(pms_p.business_date + 1, 'YYYY-MM-DD')]"
-```
+**Advanced Calculations:**
+You can also perform logic inside the brackets, such as fetching data for "Tomorrow":
+`-p p_date="@[to_char(pms_p.business_date + 1, 'YYYY-MM-DD')]"`
 
-### Breakdown of the Logic:
+### Resolution Lifecycle
 
-1. **Context Initialization:** The `--initialize-db` flag ensures the session is logged in (e.g., as `SUPERVISOR`) so that packages like `pms_p` are accessible.
-2. **The Dynamic Filter:** The CLI detects `@[...]`, executes `SELECT to_char(pms_p.business_date, 'YYYY-MM-DD') FROM DUAL`, and captures the result.
-3. **Variable Injection:** The resolved date is then bound to the `:p_date` placeholder in your main query.
-4. **Result:** Your report always runs for the current system business date without manual intervention.
+1. **Context Init:** The CLI initializes the session so the database can access packages like `pms_p`.
+2. **Expression Execution:** The CLI runs `SELECT [your_expression] FROM DUAL`.
+3. **Result Capture:** The result is stored as a temporary string.
+4. **Final Execution:** The main query is executed with the resolved dynamic value.
 
 ---
 
 ### Parameter Parsing Rules
 
-| Parameter Format | Description                             | Example                         |
-| ---------------- | --------------------------------------- | ------------------------------- |
-| **Static**       | Hardcoded string or number              | `-p resort="SAIV"`              |
-| **Dynamic**      | Resolved via DB function using `@[...]` | `-p p_date="@[trunc(sysdate)]"` |
-| **Escaped**      | Handles spaces and special characters   | `-p filter="In House"`          |
+| Format      | Syntax Example             | Use Case                                     |
+| ----------- | -------------------------- | -------------------------------------------- |
+| **Static**  | `-p resort="SAIV"`         | Known constants and IDs.                     |
+| **Dynamic** | `-p d="@[trunc(sysdate)]"` | Dates, counters, or system variables.        |
+| **Quoted**  | `-p msg="In House"`        | Values containing spaces or special symbols. |
 
 > [!TIP]
-> **Performance Note:** Dynamic parameters require an extra round-trip to the database to resolve the function. For bulk automation, ensure your function calls are optimized and index-friendly.
+> **Performance Tip:** Dynamic parameters require a tiny extra "round-trip" to the database. For complex automation, ensure the functions you use in `@[...]` are fast and optimized for performance.
+
+> [!NOTE]
+> **Dynamic Flexibility:** By defining placeholders inside your query (e.g., `:p_date`) rather than hardcoding logic, you gain the ability to switch between Static Values (manual dates) and Dynamic Resolution (system dates) directly from the command line without modifying the SQL file.
+
+---
+
+Here is the refactored documentation for **Sections 9 and 10** (originally 8-9 in your draft). I have updated the headings to match your new 11-step master list while maintaining the professional phrasing and layout.
 
 ---
 
 ## Session Lifecycle Hooks (Before/After)
 
-To support complex reporting workflows, Open Report allows you to execute "Hooks"—SQL statements that run immediately before the data extraction begins and immediately after it completes.
+To support complex reporting workflows, Open Report allows you to execute **Hooks**—SQL statements that run immediately before data extraction begins and immediately after it completes. This is essential for managing temporary database states without manual intervention.
 
 ### Automatic PL/SQL Wrapping
 
-To keep commands clean and developer-friendly, the CLI is "Smart." You do not need to include `BEGIN` and `END;` keywords. Open Report automatically wraps your statements in an anonymous PL/SQL block, ensuring they execute correctly within the Oracle session.
+To keep your commands clean, the CLI is "Smart." You do not need to include `BEGIN` and `END;` keywords. Open Report automatically wraps your statements in an anonymous PL/SQL block, ensuring they execute correctly within the Oracle session.
 
-#### **Key Use Cases**
+**Key Use Cases:**
 
-- **Initialization:** Populating temporary tables or setting session variables.
-- **Audit Logging:** Inserting a record into an audit table before the report starts.
-- **Cleanup:** Truncating temp tables or closing sessions after data is fetched.
+- **Initialization:** Populating Global Temporary Tables (GTTs) or setting session-specific variables.
+- **Audit Logging:** Inserting records into an audit table to track the start of a report.
+- **Cleanup:** Truncating temp tables or clearing session flags after the data is fetched.
 
 ---
 
 ### Implementation Example
 
-In this scenario, we generate temporary data, run our report, and then clean up the database.
+In this scenario, we populate a temporary table using a parameter, run the report, and then clear the data.
 
 ```bash
 open_report dump -c PROD_DB \
@@ -219,173 +344,34 @@ open_report dump -c PROD_DB \
 
 ```
 
-### How it Works Under the Hood
+### Execution Logic
 
-When you pass these flags, the CLI orchestrates the execution as follows:
-
-1. **Before Statement:** Executed as `BEGIN [your_statement]; END;`. If this fails, the process halts to prevent incorrect data reporting.
-2. **Main Query:** The data is fetched and stored in the requested format.
-3. **After Statement:** Executed as `BEGIN [your_statement]; END;`. This runs regardless of whether the main query succeeded (unless there was a connection failure), ensuring your environment stays clean.
+1. **Before Statement:** Executed as `BEGIN [your_statement]; END;`. If this fails, the process halts to prevent incorrect reporting.
+2. **Main Query:** The primary data fetch is executed and streamed to your file.
+3. **After Statement:** Executed as `BEGIN [your_statement]; END;`. This runs even if the main query fails (unless the connection is lost), ensuring your environment is always left clean.
 
 ---
 
-### Best Practices
+## Batch Queries (Query Folders)
 
-- **Atomic Actions:** Keep before/after statements concise. For complex logic, call a stored procedure rather than writing long SQL strings.
-- **Parameter Passing:** You can use the same `:placeholders` in your hooks that you use in your main query.
-- **Error Handling:** Use the `logger` at `DEBUG` level to see the full PL/SQL block if a hook fails.
-
----
-
-Understood. For the documentation, we should focus purely on the user interface (the CLI) and how an administrator would use it to manage their workspace.
-
-Here is the enterprise-grade documentation for **Workspace Path Management**.
-
----
-
-## Workspace Path Management
-
-Open Report maintains a "Home" for all your data exports. Instead of manually editing configuration files, you can use the built-in CLI commands to inspect or redirect your default reporting hub.
-
-### `output-path` View Current Workspace
-
-To verify the active directory where files will be saved by default, use the `output-path` utility. This is essential for auditing automated systems.
-
-**Command:**
-
-```bash
-open_report dump output-path
-
-```
-
-**Expected Output:**
-
-```text
-ℹ️ Info: Default output directory: C:/Users/Admin/Reports
-
-```
-
-### `set-output-dir` Update Default Workspace
-
-To relocate your reporting hub to a different drive, a network share, or a dedicated server folder, use the `set-output-dir` command.
-
-**Command:**
-
-```bash
-open_report dump set-output-dir "D:/Enterprise/Data/Reports"
-
-```
-
-**Expected Output:**
-
-```text
-✅ Success: Default output directory updated to: D:/Enterprise/Data/Reports
-
-```
-
----
-
-## Output File Management
-
-Once your workspace is set, the CLI intelligently handles the `--file-name` flag based on whether you provide a name, a relative path, or a full system path.
-
-### The Workspace Hierarchy
-
-The CLI resolves the final destination of a file based on a specific priority sequence:
-
-1. **Absolute Override:** If a full system path is provided, it is used exactly as written.
-2. **Relative Anchor:** If a partial path is provided, it is appended to the `default_output_dir` defined in your config.
-3. **Automated Naming:** If no name is provided, a timestamped file is generated inside the `default_output_dir`.
-
----
-
-### Using the `--file-name` Flag
-
-You can control the output location on a per-command basis using the `--file-name` flag.
-
-#### **Scenario A: Absolute Paths (System Override)**
-
-Use this for specific, one-off exports to shared drives or system folders.
-
-```bash
-# Data will be saved exactly at the specified location
-open_report dump -c PROD -q "SELECT..." --file-name "D:/Shared/Finance/Final_Report.csv" delimited
-
-```
-
-#### **Scenario B: Relative Paths (Sub-folders)**
-
-Use this to organize reports into sub-directories within your workspace. Open Report will automatically create any missing folders.
-
-```bash
-# If workspace is "C:/Reports", file will land in "C:/Reports/Daily/sales.csv"
-open_report dump -c PROD -q "SELECT..." --file-name "Daily/sales.csv" delimited
-
-```
-
-#### **Scenario C: Filename Only**
-
-Simply providing a name anchors it to the root of your workspace.
-
-```bash
-# File will land in "[Workspace]/quick_export.csv"
-open_report dump -c PROD -q "SELECT..." --file-name "quick_export.csv" delimited
-
-```
-
----
-
-### Comparison Table: Path Resolution
-
-| Input Flag           | Configuration Root | Resolved Result                         |
-| -------------------- | ------------------ | --------------------------------------- |
-| _None_               | `/app/data`        | `/app/data/dump_PROD_20260209_1200.csv` |
-| `audit.csv`          | `/app/data`        | `/app/data/audit.csv`                   |
-| `fin/jan.csv`        | `/app/data`        | `/app/data/fin/jan.csv`                 |
-| `C:/Exports/log.csv` | `/app/data`        | `C:/Exports/log.csv` (Root Ignored)     |
-
----
-
-### Operational Best Practices
-
-> [!IMPORTANT]
-> **Directory Auto-Creation:** Open Report uses "Deep-Path" creation. If you specify `--file-name "year/month/day/report.csv"`, the CLI will recursively create every folder in that chain if they do not exist.
-
-- **UNC Paths:** For Windows server environments, you can set your output directory to a network share: `open_report dump set-output-dir "\\FILE-SERVER-01\Public\Reports"`.
-<!-- - **CI/CD Integration:** When running in GitHub Actions, set your output directory to `./dist` to easily capture the reports as build artifacts. -->
-
----
-
-## Batch Query Execution (Query Folders)
-
-Open Report provides a streamlined way to execute multiple SQL scripts as a single unified dataset. This is ideal for "Union Reporting" where data is split across different tables but needs to be exported as one cohesive file.
+Open Report provides a streamlined way to execute multiple SQL scripts as a single, unified dataset. This "Union Orchestrator" is ideal for merging data split across different tables (e.g., History and Forecast) into one cohesive export.
 
 ### How it Works
 
-When you use the `--query-folder` flag, Open Report performs the following:
+When you use the `--query-folder` flag, the CLI performs the following steps:
 
 1. **Discovery:** Scans the designated folder for files matching your extension (default: `.sql`).
-2. **Merging:** Reads all discovered files and concatenates them into one large execution string, separated by newlines.
+2. **Merging:** Reads and concatenates all discovered files into one large execution string, separated by newlines.
 3. **Unified Execution:** Sends the combined script to the Oracle engine as a single block.
 
 > [!IMPORTANT]
 > **Column Mapping:** Since the scripts are merged, if your queries are intended to form a single dataset, the number of columns and their data types **must match exactly** across all files in the folder.
 
-### Query Path Resolution
-
-Just like output files, query files and folders support both **Absolute** and **Relative** paths:
-
-- **Absolute Paths:** If you provide a full path (e.g., `C:/SQL/Monthly`), the CLI looks exactly there.
-- **Relative Paths:** If you provide a partial path (e.g., `queries/reports`), the CLI anchors it to your **Default Workspace** (the directory set via `set-output-dir`).
-
 ---
 
 ### Enterprise Example: History & Future Union
 
-Imagine you have two separate SQL files in a folder named `inventory_stats`:
-
-1. `01_history.sql`: Fetches data from `RESV_HISTORY_VIEW`.
-2. `02_forecast.sql`: Fetches data from `RESV_FORECAST_VIEW`.
+Imagine a folder named `inventory_stats` containing `01_history.sql` and `02_forecast.sql`.
 
 **Command:**
 
@@ -395,13 +381,9 @@ open_report dump -c PROD --query-folder "inventory_stats" delimited
 ```
 
 **Resolution Logic:**
-Open Report finds the folder inside your workspace, joins the two scripts, and produces a single CSV containing both historical and future records.
-
----
+The CLI finds the folder, joins the scripts based on alphabetical order, and produces a single file containing both historical and future records.
 
 ### Filter and Extension Options
-
-You can fine-tune which files are picked up using the filter and extension flags.
 
 | Flag              | Description                                        | Example                       |
 | ----------------- | -------------------------------------------------- | ----------------------------- |
@@ -409,20 +391,71 @@ You can fine-tune which files are picked up using the filter and extension flags
 | `--extensions`    | The file type to look for (Default: `sql`).        | `--extensions "txt"`          |
 | `--folder-filter` | A glob pattern to filter filenames (Default: `*`). | `--folder-filter "finance_*"` |
 
-**Example (Filtering for specific files):**
+**Example (Filtered Batch):**
 
 ```bash
-# Only merge files starting with 'finance_' and ending in .sql
+# Only merge files starting with 'finance_'
 open_report dump -c PROD --query-folder "reports" --folder-filter "finance_*" delimited
+
+```
+
+### Best Practices for Batch Queries
+
+- **Sequential Naming:** Use numeric prefixes (e.g., `01_main.sql`, `02_extra.sql`) to control the exact order of the data union.
+- **Workspace Anchoring:** Keep your SQL templates inside your `default_output_dir` to use short, relative paths.
+- **Validation:** Use the `show` subcommand first to verify that the combined query is syntactically correct before exporting a large file.
+
+---
+
+## Z SQL Queries (.zsql)
+
+The `.zsql` format is a proprietary, encrypted "vault" for your SQL business logic. It allows you to package sensitive database queries so they can be executed by end-users or automated tasks without ever exposing the underlying SQL code or table structures.
+
+### Execution from Vault
+
+Instead of passing a plaintext `.sql` file, you can pass a `.zsql` archive created via the [`encrypt query`](encyption.md#secure-query-archives-zsql) utility . The CLI handles the on-the-fly decryption in memory, ensuring the SQL is never written to disk in its raw form.
+
+**Command Example:**
+
+```bash
+# Executing an encrypted query archive
+open_report dump -c PROD -f "finance_logic.zsql" delimited
 
 ```
 
 ---
 
-### Best Practices for Batch Queries
+### Key Advantages for Enterprise
 
-- **Sequential Naming:** Use numeric prefixes (e.g., `01_`, `02_`) if the order of execution matters for your data union.
-- **Workspace Anchoring:** Keep your SQL templates inside your defined `default_output_dir` so you can use short, relative paths in your automation scripts.
-- **Validation:** Use the `show` subcommand first to verify that the combined queries don't produce a syntax error before exporting to a file.
+- **Logic Protection:** Prevents unauthorized viewing or tampering with proprietary reporting logic.
+- **Streamlined Distribution:** Bundle multiple complex SQL files into a single, portable `.zsql` archive.
+- **Enhanced Security:** If the archive was created with the `--protect` flag, the CLI will prompt for the archive-specific password before execution, providing a layer of multi-factor authorization.
+- **Integrity Validation:** The engine ensures the file hasn't been corrupted or modified since its creation.
+
+### Handling Protected Archives
+
+When running a `.zsql` file that was encrypted with an extra password, the CLI will trigger a secure prompt:
+
+```text
+open_report dump -c PROD -f "secure_report.zsql" show
+🔑 Enter password to unlock archive: [HIDDEN_INPUT]
+
+```
 
 ---
+
+### Operational Flow Comparison
+
+| Feature            | Standard SQL (`.sql`) | Encrypted Vault (`.zsql`)  |
+| ------------------ | --------------------- | -------------------------- |
+| **Visibility**     | Plaintext / Readable  | Encrypted / Hidden         |
+| **Tamper Proof**   | No                    | Yes (Signature Validation) |
+| **Multi-file**     | Single file per `-f`  | Can bundle multiple files  |
+| **Password Layer** | None                  | Optional (via `--protect`) |
+
+> [!NOTE]
+> **Dynamic Flexibility:** Even when using `.zsql` archives, you retain the ability to use **Parameters** and **Dynamic Resolution**. Placeholders defined inside the encrypted SQL (e.g., `:p_resort`) are still satisfy-able via the standard `-p` flag in your command.
+
+---
+
+\*Powered by **Xkyeron**\*

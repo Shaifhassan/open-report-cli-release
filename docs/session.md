@@ -55,3 +55,5 @@ Wipes the entire session cache.
 5. **Final Step:** `open_report deliver ftp ....` (Sends both files automatically)
 
 ---
+
+\*Powered by **Xkyeron**\*
