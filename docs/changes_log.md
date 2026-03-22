@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.0.5] - 2026-03-26
+
+### Added
+
+- **Text File Output**: Dedicated `text-file` sub command to export text file output which support custom deliminator more than
+
+### Improved
+
+- **Delimited Export**: Refactored `delimitated` to support custom file extension.
+- **Servers Test**: Add `thick-client` support for server `test` command
+
+---
+
 ## [1.0.3] - 2026-02-10
 
 ### Added

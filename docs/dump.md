@@ -34,12 +34,25 @@ These flags are the foundation of every extraction task.
 
 The `dump` command must be paired with an output subcommand. This determines how the CLI fetches, formats, and presents your data.
 
+#### **`text-file` (TXT)**
+
+Generated a delimited text file output, which supports custom delimiter
+
+- **Example:** `open_report dump -c PROD -q "SELECT resort, name FROM resort" text-file`
+- **Feature:**
+  - Use `--delimiter` to set the deliminator, by default uses `\t` (Tab).
+  - Use `--default_ext` to define the default extension on the exported file, by default uses `txt`
+  - Use `--no-show-header` to generate "clean" data files, perfect for appending to existing logs.
+
 #### **`delimited` (CSV/TSV)**
 
 The industry standard for data analysts and spreadsheet integration.
 
 - **Example:** `open_report dump -c PROD -q "SELECT * FROM DUAL" delimited --delimiter ","`
-- **Feature:** Use `--no-show-header` to generate "clean" data files, perfect for appending to existing logs.
+- **Feature:**
+  - Use `--delimiter` to set a 1 Character deliminator, by default uses `,` (Comma).
+  - Use `--default_ext` to define the default extension on the exported file, by default uses `csv`
+  - Use `--no-show-header` to generate "clean" data files, perfect for appending to existing logs.
 
 #### **`json`**
 

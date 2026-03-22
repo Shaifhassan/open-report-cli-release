@@ -203,6 +203,12 @@ Performs a real-time handshake with the server to verify credentials and network
 - **Syntax:** `open_report servers test [NAME]`
 - **Process:** Decrypts credentials temporarily in memory, attempts a session bind, and reports success/failure.
 
+> [!NOTE]
+> ❌ Error: Connection failed: DPY-3015: password verifier type 0x939 is not supported by python-oracledb in thin mode Help: https://python-oracledb.readthedocs.io/en/latest/user_guide/troubleshooting.html#dpy-3015"
+> Then use the Thick client
+
+- **Thick client:** Use Thick client Path to test using thick client `--thick-client-path "D:\sql_query\instantclient_23_0"`, down load thick client from https://www.oracle.com/database/technologies/instant-client/downloads.html
+
 #### **`enable` / `disable`**
 
 Toggles the operational status of a server without deleting its configuration.
