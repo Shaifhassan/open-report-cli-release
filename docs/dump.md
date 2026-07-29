@@ -28,6 +28,9 @@ These flags are the foundation of every extraction task.
 > [!TIP]
 > Use the `--help` flag at any level (e.g., `open_report dump delimited --help`) to view advanced tuning options for specific formats.
 
+> [!NOTE]
+> `--file-name` parameter can be used with relative path as well as absolute path (eg: `./report.sql` or `D:/home/user/report.sql`).
+
 ---
 
 ## Output Subcommands
@@ -109,6 +112,15 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 1. **Absolute Override:** If you provide a full path (e.g., `C:/Exports/data.csv`), the Workspace is ignored.
 2. **Relative Anchor:** If you provide a partial path (e.g., `daily/report.csv`), it is saved inside your Workspace.
 3. **Automated Naming:** If no file name is provided, the CLI generates a timestamped file inside the Workspace.
+4. **Time Stamp Naming:** You can provide a time stamp format by using `@[FORMAT]` (e.g., `@[%Y%m%d_%H%M%S]`).
+  - `%Y` Year
+  - `%m` Month
+  - `%d` Day
+  - `%H` Hour
+  - `%M` Minute
+  - `%S` Second
+
+####
 
 ### Usage Scenarios
 
@@ -118,6 +130,9 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 | **Simple Name**   | `... --file-name "audit.csv" delimited`       | `/app/data/audit.csv`                   |
 | **Sub-folder**    | `... --file-name "finance/jan.csv" delimited` | `/app/data/finance/jan.csv`             |
 | **Absolute**      | `... --file-name "D:/log.csv" delimited`      | `D:/log.csv`                            |
+| **Time Stamp**    | `... --file-name "RV@[%Y%m%d].sun" delimited` | `/app/data/RV20260210.sun`              |
+
+
 
 ### Operational Best Practices
 
