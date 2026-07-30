@@ -31,6 +31,33 @@ These flags are the foundation of every extraction task.
 > [!NOTE]
 > `--file-name` parameter can be used with relative path as well as absolute path (eg: `./report.sql` or `D:/home/user/report.sql`).
 
+### All Dump Options
+
+Below is a list of all available options. To view more details about them, run `dump --help`.
+
+| Flag                          | Shorthand | Type | Description                                                  |
+| :---------------------------- | :-------: | :--: | :----------------------------------------------------------- |
+| `--conn`                      |   `-c`    | TEXT | The server alias (defined in `servers add-oracle`).          |
+| `--thick-client-path`         |           | PATH | Pass the thick client `Path` to use for the database connection. |
+| `--query-file`                |   `-f`    | PATH | Path to a local `.sql` file containing your query.           |
+| `--query`                     |   `-q`    | TEXT | A raw SQL string to execute.                                 |
+| `--query-folder`              |           | PATH | A path to a folder containing query files.                   |
+| `--extensions`                |           | TEXT | Extension to filter query files from the query folder [default: `sql`]. |
+| `--folder-filter`             |           | TEXT | A filename filter [default: `*`].                            |
+| `--z-sql-file`                |           | PATH | An encrypted query file path.                                |
+| `--z-sql-key`                 |           | TEXT | The key for the encrypted file; if not provided, you will be prompted. |
+| `--before-statement`          |           | TEXT | A procedure to run before querying the data.                 |
+| `--after-statement`           |           | TEXT | A procedure to run after querying the data.                  |
+| [`--param`](#using-parameter) |   `-p`    | TEXT | Pass parameters as `key=value` (add multiple with repeated `-p`). |
+| `--initialize-db`             |           | FLAG | A flag to initialize the database.                           |
+| `--username`                  |   `-u`    | TEXT | Pass the username for database initialization.               |
+| `--resort`                    |   `-r`    | TEXT | Pass the resort code for database initialization.            |
+| `--password`                  |           | TEXT | Pass an encrypted key as a password for initialization; if not provided, you will be prompted. |
+| `--clear-password`            |           | FLAG | A flag to indicate if the provided password is clear text.   |
+| `--file-name`                 |           | PATH | The output file name.                                        |
+| `--append-file`               |           | FLAG | A flag to indicate if the output file should be appended or overwritten. |
+| `--help`                      |           | FLAG | Show help text.                                              |
+
 ---
 
 ## Output Subcommands
@@ -113,12 +140,13 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 2. **Relative Anchor:** If you provide a partial path (e.g., `daily/report.csv`), it is saved inside your Workspace.
 3. **Automated Naming:** If no file name is provided, the CLI generates a timestamped file inside the Workspace.
 4. **Time Stamp Naming:** You can provide a time stamp format by using `@[FORMAT]` (e.g., `@[%Y%m%d_%H%M%S]`).
-  - `%Y` Year
-  - `%m` Month
-  - `%d` Day
-  - `%H` Hour
-  - `%M` Minute
-  - `%S` Second
+
+- `%Y` Year
+- `%m` Month
+- `%d` Day
+- `%H` Hour
+- `%M` Minute
+- `%S` Second
 
 ####
 
@@ -131,8 +159,6 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 | **Sub-folder**    | `... --file-name "finance/jan.csv" delimited` | `/app/data/finance/jan.csv`             |
 | **Absolute**      | `... --file-name "D:/log.csv" delimited`      | `D:/log.csv`                            |
 | **Time Stamp**    | `... --file-name "RV@[%Y%m%d].sun" delimited` | `/app/data/RV20260210.sun`              |
-
-
 
 ### Operational Best Practices
 
@@ -250,7 +276,7 @@ open_report dump -c OPERA_PROD \
 > **Avoid Plaintext Passwords:** Whenever possible, avoid typing your password directly in the command. If you skip the `--password` flag, the CLI will provide a secure hidden input prompt.
 
 > [!TIP]
-> **Use Key as Passwords** use the `open_report encrypt password` command to get a key read more [here](encyption.md#secure-credential-injection).
+> **Use Key as Passwords** use the `open_report encrypt password` command to get a key read more here.
 
 ---
 
