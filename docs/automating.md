@@ -62,6 +62,109 @@ echo Done.
 
 ```
 
+#### **Option C: PowerShell Script & Batch Automation (`Back_office_export.ps1`)**
+
+Sample powershell script to run a automatic back office file
+
+```powershell
+# Run-Backoffice Export.ps1
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# ----- Working directory -----
+$WorkingDir = 'D:\BOF'
+Set-Location $WorkingDir
+Write-Host "Changed working directory to $WorkingDir" -ForegroundColor Green
+
+# 1. Setup configuration
+# to get SecureToken Password for the user name use
+# ./open_report.exe encrypt password
+# and enter the Password for Username
+$Config = [ordered]@{
+    ExePath     = '.\open_report.exe'
+    Resort      = 'DEMO'
+    FileNameTmpl= 'RV{0}_{1}.ndf'
+    UserName    = 'SUPERVISOR'
+    SecureToken = 'gAAAAABqauuoOMVKsNIIjKjqXDt_MwDyxHr4jfsWd_s8y0hBP7zL_vbu3Su4bZkWHny4ZkT7MGemYfVLqJB5JAp-Mll2aByxtA=='
+}
+
+# Resolve Date & File Name
+$YesterdayDate = (Get-Date).AddDays(-1)
+$YesterdayStr  = $YesterdayDate.ToString('yyyy-MM-dd')
+$FileName      = [string]::Format($Config.FileNameTmpl, $Config.Resort, $YesterdayDate.ToString('yyyyMMdd'))
+
+# Fix: Ensure single quotes are included around the date string for PL/SQL
+$BeforeStatement = "BEGIN BOF_VIEW_REF.SET_TRANSFER_DATE(TO_DATE('$YesterdayStr', 'YYYY-MM-DD')); END;"
+
+# Define the runs
+$Runs = @(
+    @{
+        QueryFile = "$PWD/sql/01_header.sql"
+        Widths    = '32,6,474'
+        Append    = $false
+    },
+    @{
+        QueryFile = "$PWD/sql/02_main.sql"
+        Widths    = '10,5,7,8,2,1,14,18,1,1,5,5,15,94,5,18,18,14,15,15,15,15'
+        Append    = $true
+    }
+)
+
+# Base arguments matching your original batch command structure
+$baseArgs = @(
+    'dump',
+    '-c', $Config.Resort,
+    '--before-statement', $BeforeStatement,
+    '-p', "resort=$($Config.Resort)",
+    '-p', "username=$($Config.UserName)",
+    '-p', "password=$($Config.SecureToken)",
+    '-p', "p_date=$YesterdayStr",
+    '--initialize-db',
+    '--file-name', "$FileName"
+)
+
+# ----- Execute each run -----
+$runIndex = 0
+foreach ($run in $Runs) {
+    $runIndex++
+
+    # Construct complete argument list for this run
+    $cmdArgs = @()
+    $cmdArgs += $baseArgs
+    $cmdArgs += @('--query-file', $run.QueryFile)
+
+    if ($run.Append) {
+        $cmdArgs += '--append-file'
+    }
+
+    $cmdArgs += @(
+        'fixed-width',
+        '--widths', $run.Widths,
+        '--right-align-numeric'
+    )
+
+    Write-Host ("Run #{0}: {1} {2}" -f $runIndex, $Config.ExePath, ($cmdArgs -join ' ')) -ForegroundColor DarkGray
+
+    # Execute external tool with argument splatting
+    & $Config.ExePath @cmdArgs
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "open_report exited with code $LASTEXITCODE on run #$runIndex"
+    }
+}
+```
+
+for automation create a `batch file` and run to run the powershell script
+
+```batch
+@echo off
+setlocal
+set SCRIPT_DIR=%~dp0
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%bof_export.ps1"
+if errorlevel 1 pause
+endlocal
+```
+
 ---
 
 ### 3. Linux Automation Template (`sync.sh`)

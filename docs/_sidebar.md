@@ -6,11 +6,11 @@
 - **Configurations**
   - [Server Management](servers.md#server-management-reference)
   - [Logger](logging.md#observability-amp-logging)
-  - [Output Directory](dump.md#workspace-path-management)
+  <!-- - [Output Directory](dump.md#workspace-path-management) -->
 
 - **Modules**
+  - [Dump Command](dump.md#data-extraction-dump)
   - [Encryption](encyption.md#encyption-amp-security)
-  - [Data Extraction](dump.md#data-extraction-dump)
   - [Session](session.md#session-amp-cache-management)
   - [Data Delivery](deliver.md#data-delivery-deliver)
 

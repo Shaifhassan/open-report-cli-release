@@ -1,5 +1,8 @@
 - Versioning
-  - [v1.0.3 (Latest)](/)
+  - [v1.0.6 (Latest)](/)
+  - [v1.0.5](/)
+  - [v1.0.4](/)
+  - [v1.0.3](/)
   - [v1.0.2](/)
   - [v1.0.0](/v1.0.0/)
   - [All Releases](https://github.com/Shaifhassan/open-report-cli-release/releases)
