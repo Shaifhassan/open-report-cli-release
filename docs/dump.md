@@ -35,28 +35,28 @@ These flags are the foundation of every extraction task.
 
 Below is a list of all available options. To view more details about them, run `dump --help`.
 
-| Flag                          | Shorthand | Type | Description                                                  |
-| :---------------------------- | :-------: | :--: | :----------------------------------------------------------- |
-| `--conn`                      |   `-c`    | TEXT | The server alias (defined in `servers add-oracle`).          |
-| `--thick-client-path`         |           | PATH | Pass the thick client `Path` to use for the database connection. |
-| `--query-file`                |   `-f`    | PATH | Path to a local `.sql` file containing your query.           |
-| `--query`                     |   `-q`    | TEXT | A raw SQL string to execute.                                 |
-| `--query-folder`              |           | PATH | A path to a folder containing query files.                   |
-| `--extensions`                |           | TEXT | Extension to filter query files from the query folder [default: `sql`]. |
-| `--folder-filter`             |           | TEXT | A filename filter [default: `*`].                            |
-| `--z-sql-file`                |           | PATH | An encrypted query file path.                                |
-| `--z-sql-key`                 |           | TEXT | The key for the encrypted file; if not provided, you will be prompted. |
-| `--before-statement`          |           | TEXT | A procedure to run before querying the data.                 |
-| `--after-statement`           |           | TEXT | A procedure to run after querying the data.                  |
-| [`--param`](#using-parameter) |   `-p`    | TEXT | Pass parameters as `key=value` (add multiple with repeated `-p`). |
-| `--initialize-db`             |           | FLAG | A flag to initialize the database.                           |
-| `--username`                  |   `-u`    | TEXT | Pass the username for database initialization.               |
-| `--resort`                    |   `-r`    | TEXT | Pass the resort code for database initialization.            |
-| `--password`                  |           | TEXT | Pass an encrypted key as a password for initialization; if not provided, you will be prompted. |
-| `--clear-password`            |           | FLAG | A flag to indicate if the provided password is clear text.   |
-| `--file-name`                 |           | PATH | The output file name.                                        |
-| `--append-file`               |           | FLAG | A flag to indicate if the output file should be appended or overwritten. |
-| `--help`                      |           | FLAG | Show help text.                                              |
+| Flag                                                         | Shorthand | Type | Description                                                                                    |
+| :----------------------------------------------------------- | :-------: | :--: | :--------------------------------------------------------------------------------------------- |
+| `--conn`                                                     |   `-c`    | TEXT | The server alias (defined in `servers add-oracle`).                                            |
+| `--thick-client-path`                                        |           | PATH | Pass the thick client `Path` to use for the database connection.                               |
+| `--query-file`                                               |   `-f`    | PATH | Path to a local `.sql` file containing your query.                                             |
+| `--query`                                                    |   `-q`    | TEXT | A raw SQL string to execute.                                                                   |
+| [`--query-folder`](#batch-queries-query-folders)             |           | PATH | A path to a folder containing query files.                                                     |
+| [`--extensions`](#filter-and-extension-options)              |           | TEXT | Extension to filter query files from the query folder [default: `sql`].                        |
+| [`--folder-filter`](#filter-and-extension-options)           |           | TEXT | A filename filter [default: `*`].                                                              |
+| [`--z-sql-file`](#z-sql-queries-zsql)                        |           | PATH | An encrypted query file path.                                                                  |
+| [`--z-sql-key`](#z-sql-queries-zsql)                         |           | TEXT | The key for the encrypted file; if not provided, you will be prompted.                         |
+| [`--before-statement`](#session-lifecycle-hooks-beforeafter) |           | TEXT | A procedure to run before querying the data.                                                   |
+| [`--after-statement`](#session-lifecycle-hooks-beforeafter)  |           | TEXT | A procedure to run after querying the data.                                                    |
+| [`--param`](#using-parameters)                               |   `-p`    | TEXT | Pass parameters as `key=value` (add multiple with repeated `-p`).                              |
+| [`--initialize-db`](#database-initialization)                |           | FLAG | A flag to initialize the database.                                                             |
+| `--username`                                                 |   `-u`    | TEXT | Pass the username for database initialization.                                                 |
+| `--resort`                                                   |   `-r`    | TEXT | Pass the resort code for database initialization.                                              |
+| `--password`                                                 |           | TEXT | Pass an encrypted key as a password for initialization; if not provided, you will be prompted. |
+| `--clear-password`                                           |           | FLAG | A flag to indicate if the provided password is clear text.                                     |
+| [`--file-name`](#output-file-management)                     |           | PATH | The output file name.                                                                          |
+| `--append-file`                                              |           | FLAG | A flag to indicate if the output file should be appended or overwritten.                       |
+| `--help`                                                     |           | FLAG | Show help text.                                                                                |
 
 ---
 
