@@ -168,6 +168,8 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 - **UNC Paths:** For Windows environments, you can point your workspace directly to a network share: `open_report dump set-output-dir "\\FILE-SERVER\Public\Reports"`.
 - **Automation:** When running in scripts, rely on the **Auto-Generate** feature to prevent file name collisions during high-frequency reporting.
 
+- **Windows Batch Timestamp Formats:** In `.bat` files, `%` is reserved for environment-variable expansion. Use `$` in timestamp formats instead, for example `@[$Y$m$d]`.
+
 ---
 
 Here is the refactored **Section 5: Using Parameters**, designed to match the professional flow of the previous sections.
@@ -200,6 +202,9 @@ You can satisfy these placeholders using the `-p` or `--param` flags. Open Repor
 open_report dump -c PROD -f sales_report.sql -p p_resort=DEMO -p p_date=2026-01-01 delimited
 
 ```
+
+> [!IMPORTANT]
+> **Date Parameters:** Date values passed with `--param` are received as strings. Convert them explicitly in your SQL to match the expected date format; for example, use `date_column = TO_DATE(:p_date, 'YYYY-MM-DD')` instead of `date_column = :p_date`.
 
 ---
 
