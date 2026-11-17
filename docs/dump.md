@@ -10,7 +10,7 @@ To ensure maximum security and data integrity, every `dump` command follows a st
 2. **Credential Decryption:** The database password is securely retrieved from the OS Keychain.
 3. **Query Composition:** SQL strings, local files, or encrypted folders are merged into an execution plan.
 4. **Parameter Injection:** Dynamic variables and "Smart Mappings" are bound to the SQL context.
-5. **Streaming Export:** Data is processed and streamed into your chosen format (CSV, JSON, etc.).
+5. **Streaming Export:** Data is processed and streamed into your chosen format (CSV, Excel, JSON, etc.).
 
 ### Global Basic Options
 
@@ -83,6 +83,22 @@ The industry standard for data analysts and spreadsheet integration.
   - Use `--delimiter` to set a 1 Character deliminator, by default uses `,` (Comma).
   - Use `--default_ext` to define the default extension on the exported file, by default uses `csv`
   - Use `--no-show-header` to generate "clean" data files, perfect for appending to existing logs.
+
+#### **`excel` (XLSX)**
+
+Exports the results to a native Excel workbook (`.xlsx`), with a frozen header row, auto-fitted columns, and control over the worksheet name.
+
+- **Example:** `open_report dump -c PROD -f ./report.sql --file-name "Arrivals@[$Y$m$d].xlsx" excel --sheet-name "Arrivals"`
+- **Feature:**
+  - Use `--sheet-name` (`-s`) to name the worksheet. If omitted, the default name `Sheet1` is used. Names are limited to 31 characters and the characters `[ ] : * ? / \` are removed automatically.
+  - Use `--default-ext` to define the default extension on the exported file, by default uses `xlsx`.
+  - Use `--no-show-header` to skip the header row.
+  - Use `--no-auto-width` to disable automatic column width fitting (enabled by default, capped at 60 characters).
+  - Use `--no-freeze-header` to disable freezing the header row (enabled by default).
+  - Use `--append-file` to add to an existing workbook. A new `--sheet-name` creates an additional sheet; an existing sheet name has the new rows added below its current data (the header is not repeated).
+
+> [!NOTE]
+> If the target file is open in Excel, the export stops with a "close it and retry" message. Timezone-aware date/time values are written without the timezone, since Excel cannot store them.
 
 #### **`json`**
 
@@ -159,6 +175,7 @@ Open Report uses a **Hierarchical Path Engine** to determine exactly where a fil
 | **Sub-folder**    | `... --file-name "finance/jan.csv" delimited` | `/app/data/finance/jan.csv`             |
 | **Absolute**      | `... --file-name "D:/log.csv" delimited`      | `D:/log.csv`                            |
 | **Time Stamp**    | `... --file-name "RV@[%Y%m%d].sun" delimited` | `/app/data/RV20260210.sun`              |
+| **Excel**         | `... --file-name "sales.xlsx" excel -s "Jan"` | `/app/data/sales.xlsx` (sheet `Jan`)    |
 
 ### Operational Best Practices
 
